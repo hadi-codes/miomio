@@ -8,8 +8,10 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
+import java.io.Serializable;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 
 public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
@@ -22,17 +24,18 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     public static final String COLUMN_CREATED_AT = "CREATED_AT";
 
 
-    Context context;
+    private transient Context context;
 
     public NoteRepository(@Nullable Context context) {
-        super(context, "notes.db", null, 1);
+        super(context, "notessks.db", null, 1);
         this.context = context;
     }
+
 
     @Override
     public void onCreate(SQLiteDatabase sqLiteDatabase) {
         String createTableStatement = "CREATE TABLE " + NOTES_TABLE +
-                " (" + COLUMN_ID + " TEXT PRIMARY KEY, "
+                " (" + COLUMN_ID + " INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, "
                 + COLUMN_TITLE + " TEXT, "
                 + COLUMN_CONTENT + " TEXT, "
                 + COLUMN_CREATED_AT + " LONG)";
@@ -44,7 +47,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     }
 
 
-    public ArrayList<Note> getAllNotes() {
+    public List<Note> getAllNotes() {
         ArrayList<Note> notes = new ArrayList<>();
         String queryString = "SELECT * FROM " + NOTES_TABLE;
         SQLiteDatabase db = this.getReadableDatabase();
@@ -125,7 +128,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
         ContentValues content = new ContentValues();
         content.put(COLUMN_TITLE, note.getTitle());
         content.put(COLUMN_CONTENT, note.getContent());
-        sqLiteDatabase.update(NOTES_TABLE, content, "ID = ?", new String[]{String.valueOf(note.getId())});
+        sqLiteDatabase.update(NOTES_TABLE, content, COLUMN_ID + " = ?", new String[]{String.valueOf(note.getId())});
         sqLiteDatabase.close();
     }
 

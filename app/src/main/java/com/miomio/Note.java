@@ -1,9 +1,11 @@
 package com.miomio;
 
+import java.io.Serializable;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-public class Note {
+public class Note implements Serializable {
+    public static final String NOTE = "NOTE";
 
     private long id;
 
@@ -31,12 +33,23 @@ public class Note {
         this.title = title;
     }
 
+    /**
+     * Used after adding a new note to the database
+     *
+     * @param id
+     */
+    public void setId(long id) {
+        this.id = id;
+    }
+
     public void setContent(String content) {
         this.content = content;
     }
 
     Note() {
         this.creatdAt = System.currentTimeMillis();
+        this.title = "";
+        this.content = "";
 
     }
 
@@ -45,6 +58,10 @@ public class Note {
         this.creatdAt = creatdAt;
         this.title = title;
         this.content = content;
+    }
+
+    boolean isEmpty() {
+        return title.isEmpty() && content.isEmpty();
     }
 
 }
