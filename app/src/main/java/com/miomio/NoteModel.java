@@ -21,6 +21,11 @@ public class NoteModel extends Observable implements Serializable {
         notes = noteRepository.getAllNotes();
     }
 
+    public NoteModel(Context context, NoteRepository noteRepository) {
+        this.noteRepository = noteRepository;
+        notes = noteRepository.getAllNotes();
+    }
+
     public Note newNote() {
 
         return addNote(new Note());
@@ -66,6 +71,10 @@ public class NoteModel extends Observable implements Serializable {
             }
         }
         return null;
+    }
+
+    public List<Note> search(String query) {
+        return noteRepository.search(query);
     }
 
     public void addNoteObserver(Observer observer) {

@@ -8,8 +8,6 @@ import android.database.sqlite.SQLiteOpenHelper;
 
 import androidx.annotation.Nullable;
 
-import java.io.Serializable;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,7 +25,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     private transient Context context;
 
     public NoteRepository(@Nullable Context context) {
-        super(context, "notessks.db", null, 1);
+        super(context, "notes.db", null, 1);
         this.context = context;
     }
 
@@ -54,11 +52,8 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
         Cursor cursor = db.rawQuery(queryString, null);
         boolean hasNext = cursor.moveToFirst();
         while (hasNext) {
-            long id = cursor.getLong(0);
-            String title = cursor.getString(1);
-            String content = cursor.getString(2);
-            long createdAt = cursor.getLong(3);
-            Note note = new Note(id, title, content, createdAt);
+
+            Note note = getNoteFromCursor(cursor);
             notes.add(note);
             hasNext = cursor.moveToNext();
         }
@@ -66,6 +61,24 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
         db.close();
         return notes;
 
+    }
+
+    @Override
+    public List<Note> search(String query) {
+        ArrayList<Note> notes = new ArrayList<>();
+        String queryString = "SELECT * FROM " + NOTES_TABLE + " WHERE " + COLUMN_TITLE + " LIKE '%" + query + "%' OR " + COLUMN_CONTENT + " LIKE '%" + query + "%'";
+        SQLiteDatabase db = this.getReadableDatabase();
+        Cursor cursor = db.rawQuery(queryString, null);
+        boolean hasNext = cursor.moveToFirst();
+        while (hasNext) {
+
+            Note note = getNoteFromCursor(cursor);
+            notes.add(note);
+            hasNext = cursor.moveToNext();
+        }
+        cursor.close();
+        db.close();
+        return notes;
     }
 
 
@@ -122,23 +135,51 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
      * UPDATES A NOTE'S TITLE AND CONTENT
      *
      * @param note to update
+     * @return true if update was successful
+     * false if update was unsuccessful
      */
-    public void updateNote(Note note) {
-        SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
-        ContentValues content = new ContentValues();
-        content.put(COLUMN_TITLE, note.getTitle());
-        content.put(COLUMN_CONTENT, note.getContent());
-        sqLiteDatabase.update(NOTES_TABLE, content, COLUMN_ID + " = ?", new String[]{String.valueOf(note.getId())});
-        sqLiteDatabase.close();
+    public boolean updateNote(Note note) {
+        try {
+            SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+            ContentValues content = new ContentValues();
+            content.put(COLUMN_TITLE, note.getTitle());
+            content.put(COLUMN_CONTENT, note.getContent());
+            content.put(COLUMN_CREATED_AT, note.getCreatdAt());
+            sqLiteDatabase.update(NOTES_TABLE, content, COLUMN_ID + " = ?", new String[]{String.valueOf(note.getId())});
+            sqLiteDatabase.close();
+            return true;
+        } catch (Exception e) {
+            return false;
+
+        }
+
     }
 
-
-    public void deleteNote(Note note) {
-        SQLiteDatabase sqLiteDatabase = getWritableDatabase();
-        sqLiteDatabase.delete(NOTES_TABLE, "ID = ?", new String[]{String.valueOf(note.getId())});
-        sqLiteDatabase.close();
+    /**
+     * DELETES A NOTE FROM THE DATABASE
+     *
+     * @param note
+     * @return true if delete was successful
+     * false if delete was unsuccessful
+     */
+    public boolean deleteNote(Note note) {
+        try {
+            SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+            sqLiteDatabase.delete(NOTES_TABLE, "ID = ?", new String[]{String.valueOf(note.getId())});
+            sqLiteDatabase.close();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 
+    private Note getNoteFromCursor(Cursor cursor) {
+        long id = cursor.getLong(0);
+        String title = cursor.getString(1);
+        String content = cursor.getString(2);
+        long createdAt = cursor.getLong(3);
+        return new Note(id, title, content, createdAt);
+    }
 
 }
 

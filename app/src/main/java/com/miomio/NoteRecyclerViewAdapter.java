@@ -106,4 +106,11 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
 
         }
     }
+
+    public void filter(String text) {
+        List filteredNotes = noteModel.search(text);
+        notes.clear();
+        notes.addAll(filteredNotes);
+        notifyDataSetChanged();
+    }
 }
