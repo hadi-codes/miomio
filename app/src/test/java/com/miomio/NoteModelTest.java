@@ -1,93 +1,77 @@
 package com.miomio;
 
-import org.junit.Test;
-import org.mockito.Mockito;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.content.Context;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class NoteModelTest {
-    NoteModelTest() {
-        setUp();
+
+
+    private NoteRepository mockNoteRepository;
+
+    private NoteModel noteModel;
+
+    @org.junit.jupiter.api.BeforeEach
+    public void setUp() {
+        mockNoteRepository = mock(NoteRepository.class);
+        when(mockNoteRepository.getAllNotes()).thenReturn(new ArrayList<>());
+        noteModel = new NoteModel(null, mockNoteRepository);
     }
 
-    Context context = Mockito.mock(Context.class);
-    NoteRepository mockNoteRepository = Mockito.mock(NoteRepository.class);
-
-    NoteModel noteModel;
-
-    private void setUp() {
-        List notes = new ArrayList<Note>();
-        for (int i = 0; i < 10; i++) {
-            Note note = new Note(i, "title" + i, "content" + i, i);
-            note.setId(i);
-            notes.add(note);
-        }
-        when(mockNoteRepository.getAllNotes()).thenReturn(notes);
-        noteModel = new NoteModel(context, mockNoteRepository);
-        mock(NoteModel.class);
-        when(mockNoteRepository.getAllNotes()).thenReturn(notes);
-        when(mockNoteRepository.createNote(Mockito.any(Note.class))).thenAnswer(invocation -> {
-            Note note = new Note(11L, "title11", "content11", 11);
-            return note.getId();
-        });
-        when(mockNoteRepository.updateNote(Mockito.any(Note.class))).thenReturn(true);
-        when(mockNoteRepository.deleteNote(Mockito.any(Note.class))).thenReturn(true);
-
-
+    @org.junit.jupiter.api.Test
+    public void testAddNote() {
+        Note note = new Note();
+        when(mockNoteRepository.createNote(note)).thenReturn(1L);
+        noteModel.addNote(note);
+        verify(mockNoteRepository).createNote(note);
     }
 
-    @Test
-    void newNote() {
-        Note note = noteModel.newNote();
-        assertEquals(11, note.getId());
-        verify(mockNoteRepository, atLeastOnce()).createNote(Mockito.any(Note.class));
+    @org.junit.jupiter.api.Test
+    public void testDeleteNote() {
+        Note note = new Note();
+        note.setId(1L);
+        noteModel.deleteNote(note);
+        verify(mockNoteRepository).deleteNote(note);
     }
 
-    @Test
-    void addNote() {
-        Note note = noteModel.newNote();
-        assertEquals(11, note.getId());
-        verify(mockNoteRepository, atLeastOnce()).createNote(Mockito.any(Note.class));
+    @org.junit.jupiter.api.Test
+    public void testUpdateNote() {
+        Note note = new Note();
+        noteModel.updateNote(note);
+        verify(mockNoteRepository).updateNote(note);
     }
 
-    @Test
-    void deleteNote() {
+    @org.junit.jupiter.api.Test
+    public void testGetNotes() {
+        List<Note> expectedNotes = new ArrayList<>();
+        when(mockNoteRepository.getAllNotes()).thenReturn(expectedNotes);
+        List<Note> actualNotes = noteModel.getNotes();
+        assertEquals(expectedNotes, actualNotes);
     }
 
-    @Test
-    void updateNote() {
+    @org.junit.jupiter.api.Test
+    public void testLoadNotes() {
+        List<Note> expectedNotes = new ArrayList<>();
+        when(mockNoteRepository.getAllNotes()).thenReturn(expectedNotes);
+        noteModel.loadNotes();
+        assertEquals(expectedNotes, noteModel.getNotes());
+        verify(mockNoteRepository,times(2)).getAllNotes();
     }
 
-    @Test
-    void getNotes() {
-    }
-
-    @Test
-    void loadNotes() {
-    }
-
-    @Test
-    void getNoteById() {
-    }
-
-    @Test
-    void search() {
-    }
-
-    @Test
-    void addNoteObserver() {
-    }
-
-    @Test
-    void removeNoteObserver() {
+    @org.junit.jupiter.api.Test
+    public void testSearch() {
+        String query = "test";
+        List<Note> expectedNotes = new ArrayList<>();
+        when(mockNoteRepository.search(query)).thenReturn(expectedNotes);
+        List<Note> actualNotes = noteModel.search(query);
+        assertEquals(expectedNotes, actualNotes);
+        verify(mockNoteRepository).search(query);
     }
 }

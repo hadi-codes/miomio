@@ -27,6 +27,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     public NoteRepository(@Nullable Context context) {
         super(context, "notes.db", null, 1);
         this.context = context;
+
     }
 
 
@@ -48,7 +49,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     public List<Note> getAllNotes() {
         ArrayList<Note> notes = new ArrayList<>();
         String queryString = "SELECT * FROM " + NOTES_TABLE;
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(queryString, null);
         boolean hasNext = cursor.moveToFirst();
         while (hasNext) {
@@ -67,7 +68,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     public List<Note> search(String query) {
         ArrayList<Note> notes = new ArrayList<>();
         String queryString = "SELECT * FROM " + NOTES_TABLE + " WHERE " + COLUMN_TITLE + " LIKE '%" + query + "%' OR " + COLUMN_CONTENT + " LIKE '%" + query + "%'";
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
         Cursor cursor = db.rawQuery(queryString, null);
         boolean hasNext = cursor.moveToFirst();
         while (hasNext) {
@@ -89,7 +90,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
      * @return identifier of the inserted note
      */
     public long createNote(Note note) {
-        SQLiteDatabase sqLiteDatabase = getWritableDatabase();
+        SQLiteDatabase db = getWritableDatabase();
 
         ContentValues content = new ContentValues();
         content.put(COLUMN_TITLE, note.getTitle());
@@ -97,12 +98,14 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
         content.put(COLUMN_CREATED_AT, note.getCreatdAt());
 
 
-        final long insert = sqLiteDatabase.insert(NOTES_TABLE, null, content);
+        final long insert = db.insert(NOTES_TABLE, null, content);
         String queryString = "SELECT " + COLUMN_ID + " FROM " + NOTES_TABLE + " WHERE rowid = " + insert;
-        final Cursor cursor = sqLiteDatabase.rawQuery(queryString, null);
+        final Cursor cursor = db.rawQuery(queryString, null);
+
         cursor.moveToFirst();
+
         final long noteId = cursor.getLong(0);
-        sqLiteDatabase.close();
+        db.close();
         cursor.close();
 
         if (insert == -1) {
@@ -120,15 +123,15 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
     public Note getNote(long noteId) {
         SQLiteDatabase sqLiteDatabase = this.getReadableDatabase();
         String queryString = "SELECT * FROM " + NOTES_TABLE + " WHERE " + COLUMN_ID + " = " + noteId;
-
+//        String queryString = "SELECT * FROM " + NOTES_TABLE + " WHERE rowid = " + noteId;
         final Cursor cursor = sqLiteDatabase.rawQuery(queryString, null);
-        cursor.moveToFirst();
-        String noteTitle = cursor.getString(1);
-        String noteContent = cursor.getString(2);
-        long dateCreated = cursor.getLong(3);
+        if (!cursor.moveToFirst()) {
+            return null;
+        }
+Note note = getNoteFromCursor(cursor);
         cursor.close();
         sqLiteDatabase.close();
-        return new Note(noteId, noteTitle, noteContent, dateCreated);
+        return note;
     }
 
     /**
@@ -140,13 +143,13 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
      */
     public boolean updateNote(Note note) {
         try {
-            SQLiteDatabase sqLiteDatabase = this.getWritableDatabase();
+            SQLiteDatabase db = this.getWritableDatabase();
             ContentValues content = new ContentValues();
             content.put(COLUMN_TITLE, note.getTitle());
             content.put(COLUMN_CONTENT, note.getContent());
             content.put(COLUMN_CREATED_AT, note.getCreatdAt());
-            sqLiteDatabase.update(NOTES_TABLE, content, COLUMN_ID + " = ?", new String[]{String.valueOf(note.getId())});
-            sqLiteDatabase.close();
+            db.update(NOTES_TABLE, content, COLUMN_ID + " = ?", new String[]{String.valueOf(note.getId())});
+            db.close();
             return true;
         } catch (Exception e) {
             return false;
@@ -164,9 +167,9 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
      */
     public boolean deleteNote(Note note) {
         try {
-            SQLiteDatabase sqLiteDatabase = getWritableDatabase();
-            sqLiteDatabase.delete(NOTES_TABLE, "ID = ?", new String[]{String.valueOf(note.getId())});
-            sqLiteDatabase.close();
+            SQLiteDatabase db = getWritableDatabase();
+            db.delete(NOTES_TABLE, "ID = ?", new String[]{String.valueOf(note.getId())});
+            db.close();
             return true;
         } catch (Exception e) {
             return false;

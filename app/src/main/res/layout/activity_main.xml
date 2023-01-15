@@ -63,8 +63,8 @@
                 app:boxStrokeColor="?attr/colorSecondary"
                 app:boxStrokeWidth="1dp"
 
-                app:hintEnabled="false"
-                app:endIconMode="clear_text">
+                app:endIconMode="clear_text"
+                app:hintEnabled="false">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/input_note_search"
@@ -96,9 +96,12 @@
                 android:id="@+id/notesRecyclerView"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:paddingHorizontal="10dp"
                 android:layout_marginStart="5dp"
                 android:layout_marginEnd="5dp"
+                android:paddingHorizontal="10dp"
+
+
+
                 app:layoutManager="androidx.recyclerview.widget.StaggeredGridLayoutManager"
                 app:spanCount="2" />
         </LinearLayout>

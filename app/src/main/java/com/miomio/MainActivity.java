@@ -50,6 +50,9 @@ public class MainActivity extends AppCompatActivity {
 
         DrawerLayout drawerLayout = findViewById(R.id.mainLayout);
         RecyclerView notesRecyclerView = findViewById(R.id.notesRecyclerView);
+        notesRecyclerView.setNestedScrollingEnabled(false);
+        notesRecyclerView.setHasFixedSize(true);
+        notesRecyclerView.setItemViewCacheSize(20);
         emptyView = findViewById(R.id.no_notes_text);
         searchInput = findViewById(R.id.input_note_search);
         FloatingActionButton floatingActionButton = findViewById(R.id.floating_action_button);
