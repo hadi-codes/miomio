@@ -2,9 +2,8 @@ package com.miomio;
 
 import android.content.Context;
 
-
 import androidx.test.core.app.ApplicationProvider;
-
+import androidx.test.platform.app.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import org.junit.After;

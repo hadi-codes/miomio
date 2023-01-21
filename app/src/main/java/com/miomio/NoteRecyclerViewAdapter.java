@@ -34,22 +34,20 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
     private List<Note> notes = new ArrayList<>();
 
 
-    private NoteModel noteModel;
-    protected static ArrayList<Note> selectedNotes = new ArrayList<>();
-    protected static ArrayList<MaterialCardView> checkedCards = new ArrayList<>();
+    private NoteController controller;
+
     private final Context context;
-    private final DrawerLayout drawerLayout;
 
-    public NoteRecyclerViewAdapter(Context context, DrawerLayout drawerLayout, NoteModel noteModel) {
+    public NoteRecyclerViewAdapter(Context context, NoteController controller) {
         this.context = context;
-        this.drawerLayout = drawerLayout;
-        this.noteModel = noteModel;
 
-        noteModel.addObserver(this);
-        noteModel.loadNotes();
+        this.controller = controller;
 
-        selectedNotes.clear();
-        checkedCards.clear();
+        controller.addObserver(this);
+        notes = controller.getAllNotes();
+
+
+
 
     }
 
@@ -66,7 +64,8 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
         holder.noteTitle.setText(note.getTitle());
         holder.noteContent.setText(note.getContent());
         holder.materialCardView.setOnClickListener(view -> {
-            NoteFragment noteFragment = new NoteFragment(noteModel, note);
+            controller.setNote(note);
+            NoteFragment noteFragment = new NoteFragment(controller);
             ((MainActivity) context).getSupportFragmentManager()
                     .beginTransaction()
                     .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
@@ -88,7 +87,7 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
 
     @Override
     public void update(Observable observable, Object o) {
-        notes = noteModel.getNotes();
+        notes = controller.getAllNotes();
         notifyDataSetChanged();
     }
 
@@ -108,9 +107,15 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
     }
 
     public void filter(String text) {
-        List filteredNotes = noteModel.search(text);
+        List filteredNotes = controller.search(text);
         notes.clear();
         notes.addAll(filteredNotes);
         notifyDataSetChanged();
+    }
+
+    @Override
+    public void onDetachedFromRecyclerView(@NonNull RecyclerView recyclerView) {
+        controller.removeObserver(this);
+        super.onDetachedFromRecyclerView(recyclerView);
     }
 }

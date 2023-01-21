@@ -1,30 +1,51 @@
 package com.miomio;
 
 import java.io.Serializable;
-import java.time.LocalDateTime;
-import java.util.UUID;
 
 public class Note implements Serializable {
-    public static final String NOTE = "NOTE";
 
+
+    public static final String NOTE = "NOTE";
     private long id;
 
     private final long creatdAt;
+
     private String title;
+
     private String content;
 
+    /**
+     * The is of the note
+     *
+     * @return long id
+     */
     public long getId() {
         return id;
     }
 
-    public long getCreatdAt() {
+    /**
+     * Timestamp of when the note was created
+     *
+     * @return long timestamp
+     */
+    public long getCreatedAt() {
         return creatdAt;
     }
 
+    /**
+     * The title of the note
+     *
+     * @return String title
+     */
     public String getTitle() {
         return title;
     }
 
+    /**
+     * The content of the note
+     *
+     * @return String content
+     */
     public String getContent() {
         return content;
     }
@@ -35,13 +56,19 @@ public class Note implements Serializable {
 
     /**
      * Used after adding a new note to the database
+     * to set the id of the note
      *
-     * @param id
+     * @param id of the note
      */
     public void setId(long id) {
         this.id = id;
     }
 
+    /**
+     * Used to set the content of the note
+     *
+     * @param content of the note
+     */
     public void setContent(String content) {
         this.content = content;
     }

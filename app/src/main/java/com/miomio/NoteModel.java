@@ -18,12 +18,13 @@ public class NoteModel extends Observable implements Serializable {
 
     public NoteModel(Context context) {
         noteRepository = new NoteRepository(context);
-        notes = noteRepository.getAllNotes();
+        loadNotes();
     }
 
     public NoteModel(Context context, NoteRepository noteRepository) {
         this.noteRepository = noteRepository;
-        notes = noteRepository.getAllNotes();
+        loadNotes();
+
     }
 
     public Note newNote() {
@@ -58,7 +59,7 @@ public class NoteModel extends Observable implements Serializable {
         return notes;
     }
 
-    public void loadNotes() {
+    private void loadNotes() {
         notes = noteRepository.getAllNotes();
         setChanged();
         notifyObservers();

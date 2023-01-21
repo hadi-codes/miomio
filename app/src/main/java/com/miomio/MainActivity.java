@@ -1,15 +1,12 @@
 package com.miomio;
 
-import static com.miomio.NoteActivity.RESULT_NO_NOTES_CHANGE;
 
 import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.textfield.TextInputEditText;
 
-import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -24,19 +21,13 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 
-import android.view.Menu;
-import android.view.MenuItem;
 import android.widget.TextView;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Observable;
-import java.util.Observer;
 
 public class MainActivity extends AppCompatActivity {
     private static final int NOTE_ACTIVITY_REQUEST_CODE = 0;
     private NoteRecyclerViewAdapter adapter;
-    private NoteModel noteModel;
+    private NoteController controller;
     private TextView emptyView;
     private TextInputEditText searchInput;
 
@@ -45,10 +36,10 @@ public class MainActivity extends AppCompatActivity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        noteModel = new NoteModel(this);
+
+        controller = new NoteController(new NoteModel(this));
 
 
-        DrawerLayout drawerLayout = findViewById(R.id.mainLayout);
         RecyclerView notesRecyclerView = findViewById(R.id.notesRecyclerView);
         notesRecyclerView.setNestedScrollingEnabled(false);
         notesRecyclerView.setHasFixedSize(true);
@@ -58,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         FloatingActionButton floatingActionButton = findViewById(R.id.floating_action_button);
 
 
-        adapter = new NoteRecyclerViewAdapter(this, drawerLayout, noteModel);
+        adapter = new NoteRecyclerViewAdapter(this,  controller);
 
         notesRecyclerView.setAdapter(adapter);
         setEmptyViewVisibility();
@@ -72,36 +63,16 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        searchInput.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+        searchInput.addTextChangedListener(new NoteTextWatcher(value -> {
+            adapter.filter(searchInput.getText().toString());
 
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                adapter.filter(searchInput.getText().toString());
-
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-
-        });
+        }));
 
         floatingActionButton.setOnClickListener(view -> {
 
 
-            Intent intent = new Intent(this, NoteActivity.class);
-            Bundle bundle = new Bundle();
-            bundle.putLong(Note.NOTE, 7);
-            intent.putExtra(NoteActivity.NOTE_ACTIVITY_BUNDLE, bundle);
-
-
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            NoteFragment noteFragment = new NoteFragment(noteModel, null);
+            NoteFragment noteFragment = new NoteFragment(controller);
             fragmentTransaction.replace(R.id.mainLayout, noteFragment, NoteFragment.TAG);
             fragmentTransaction.addToBackStack(null);
             fragmentTransaction.commit();
@@ -130,7 +101,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    private void setEmptyViewVisibility() {
+    void setEmptyViewVisibility() {
         if (adapter.getItemCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
         } else {

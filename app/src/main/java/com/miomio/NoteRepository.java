@@ -82,6 +82,13 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
         return notes;
     }
 
+    @Override
+    public void deleteAllNotes() {
+        SQLiteDatabase db = getWritableDatabase();
+        db.execSQL("DELETE FROM " + NOTES_TABLE);
+        db.close();
+    }
+
 
     /**
      * INSERTS A NEW NOTE INTO THE DATABASE
@@ -95,7 +102,7 @@ public class NoteRepository extends SQLiteOpenHelper implements NoteDataSource {
         ContentValues content = new ContentValues();
         content.put(COLUMN_TITLE, note.getTitle());
         content.put(COLUMN_CONTENT, note.getContent());
-        content.put(COLUMN_CREATED_AT, note.getCreatdAt());
+        content.put(COLUMN_CREATED_AT, note.getCreatedAt());
 
 
         final long insert = db.insert(NOTES_TABLE, null, content);
@@ -147,7 +154,7 @@ Note note = getNoteFromCursor(cursor);
             ContentValues content = new ContentValues();
             content.put(COLUMN_TITLE, note.getTitle());
             content.put(COLUMN_CONTENT, note.getContent());
-            content.put(COLUMN_CREATED_AT, note.getCreatdAt());
+            content.put(COLUMN_CREATED_AT, note.getCreatedAt());
             db.update(NOTES_TABLE, content, COLUMN_ID + " = ?", new String[]{String.valueOf(note.getId())});
             db.close();
             return true;

@@ -17,17 +17,15 @@ import com.google.android.material.textfield.TextInputEditText;
 
 public class NoteFragment extends Fragment {
     public static final String TAG = "NoteFragment";
-    private NoteModel noteModel;
-    private Note note;
-    private boolean isEditMode;
+
     private TextInputEditText titleEditText;
     private TextInputEditText contentEditText;
     private MaterialToolbar toolbar;
+    private NoteController controller;
 
-    NoteFragment(NoteModel noteModel, @Nullable Note note) {
-        this.noteModel = noteModel;
-        this.note = note;
-        this.isEditMode = note != null;
+    NoteFragment(NoteController controller) {
+
+        this.controller = controller;
     }
 
     @Nullable
@@ -39,46 +37,16 @@ public class NoteFragment extends Fragment {
         toolbar = view.findViewById(R.id.note_tool_bar);
         toolbar.setNavigationOnClickListener(x -> getActivity().onBackPressed());
 
-        if (isEditMode) {
-            titleEditText.setText(note.getTitle());
-            contentEditText.setText(note.getContent());
+        if (controller.isEditMode()) {
+            setContentOfTextFields();
+
         }
-        titleEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                String value = titleEditText.getText().toString();
-
-
-                note.setTitle(value);
-                noteModel.updateNote(note);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-
-            }
-
-        });
-        contentEditText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-                note.setContent(contentEditText.getText().toString());
-                noteModel.updateNote(note);
-            }
-
-            @Override
-            public void afterTextChanged(Editable editable) {
-            }
-
-        });
+        titleEditText.addTextChangedListener(
+                new NoteTextWatcher(value -> controller.onTitleChanged(value))
+        );
+        contentEditText.addTextChangedListener(
+                new NoteTextWatcher(value -> controller.onContentChanged(value))
+        );
 
         return view;
     }
@@ -87,21 +55,20 @@ public class NoteFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (savedInstanceState != null) {
-            note = (Note) savedInstanceState.getSerializable(Note.NOTE);
-            isEditMode = note != null;
+            controller.setNote((Note) savedInstanceState.getSerializable(Note.NOTE));
+
         }
 
-        if (!isEditMode) {
-            note = noteModel.newNote();
+        if (!controller.isEditMode()) {
+            controller.newNote();
         } else {
-            titleEditText.setText(note.getTitle());
-            contentEditText.setText(note.getContent());
+            setContentOfTextFields();
         }
         // setup toolbar on menu item click
         toolbar.setOnMenuItemClickListener(item -> {
             switch (item.getItemId()) {
                 case R.id.note_menu_delete:
-                    noteModel.deleteNote(note);
+                    controller.deleteNote();
                     getActivity().onBackPressed();
                     return true;
 
@@ -114,9 +81,14 @@ public class NoteFragment extends Fragment {
 
     }
 
+    private void setContentOfTextFields() {
+        titleEditText.setText(controller.getNote().getTitle());
+        contentEditText.setText(controller.getNote().getContent());
+    }
+
     private void deleteNoteIfEmpty() {
-        if (note.isEmpty()) {
-            noteModel.deleteNote(note);
+        if (controller.getNote() != null && controller.getNote().isEmpty()) {
+            controller.deleteNote();
         }
 
     }

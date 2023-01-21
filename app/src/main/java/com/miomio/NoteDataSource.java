@@ -2,7 +2,11 @@ package com.miomio;
 
 import java.util.List;
 
+/**
+ *  Interface for the Note repository
+ */
 public interface NoteDataSource {
+
     long createNote(Note note);
 
     Note getNote(long id);
@@ -14,5 +18,7 @@ public interface NoteDataSource {
     List<Note> getAllNotes();
 
     List<Note> search(String query);
+
+    void deleteAllNotes();
 
 }

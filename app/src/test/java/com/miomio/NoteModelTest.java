@@ -57,15 +57,6 @@ public class NoteModelTest {
     }
 
     @org.junit.jupiter.api.Test
-    public void testLoadNotes() {
-        List<Note> expectedNotes = new ArrayList<>();
-        when(mockNoteRepository.getAllNotes()).thenReturn(expectedNotes);
-        noteModel.loadNotes();
-        assertEquals(expectedNotes, noteModel.getNotes());
-        verify(mockNoteRepository,times(2)).getAllNotes();
-    }
-
-    @org.junit.jupiter.api.Test
     public void testSearch() {
         String query = "test";
         List<Note> expectedNotes = new ArrayList<>();
