@@ -3,6 +3,14 @@ plugins {
     id("de.mannodermaus.android-junit5") version "1.8.2.1"
 
 }
+apply plugin: 'idea'
+
+idea {
+    module {
+        downloadJavadoc = true
+        downloadSources = true
+    }
+}
 
 android {
     signingConfigs {

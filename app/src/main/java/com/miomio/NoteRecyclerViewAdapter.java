@@ -1,37 +1,27 @@
 package com.miomio;
 
-import android.annotation.SuppressLint;
-import android.app.Activity;
+
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
-import android.graphics.Typeface;
-import android.preference.PreferenceManager;
-import android.view.ActionMode;
+
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
+
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.drawerlayout.widget.DrawerLayout;
+
 import androidx.fragment.app.FragmentTransaction;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.google.android.material.card.MaterialCardView;
-import com.google.android.material.dialog.MaterialAlertDialogBuilder;
-import com.google.android.material.snackbar.Snackbar;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Observable;
 import java.util.Observer;
 
 public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerViewAdapter.ViewHolder> implements Observer {
-    private List<Note> notes = new ArrayList<>();
+    private List<Note> notes;
 
 
     private NoteController controller;
@@ -47,31 +37,28 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
         notes = controller.getAllNotes();
 
 
-
-
     }
 
     @NonNull
     @Override
     public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        // inflate the layout
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.note_list_tile, parent, false);
         return new ViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
+        // get the note
         Note note = notes.get(position);
+        // set the title and content
         holder.noteTitle.setText(note.getTitle());
         holder.noteContent.setText(note.getContent());
+        // set the click listener
         holder.materialCardView.setOnClickListener(view -> {
-            controller.setNote(note);
-            NoteFragment noteFragment = new NoteFragment(controller);
-            ((MainActivity) context).getSupportFragmentManager()
-                    .beginTransaction()
-                    .setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
-                    .replace(R.id.mainLayout, noteFragment)
-                    .addToBackStack(null)
-                    .commit();
+            FragmentTransaction transaction = ((MainActivity) context).getSupportFragmentManager()
+                    .beginTransaction();
+            controller.onNoteClicked(transaction, note);
 
 
         });
@@ -87,6 +74,7 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
 
     @Override
     public void update(Observable observable, Object o) {
+        // update the notes
         notes = controller.getAllNotes();
         notifyDataSetChanged();
     }
@@ -98,7 +86,9 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
+            // set material card view
             materialCardView = itemView.findViewById(R.id.material_card_view);
+            // set the title and content
             noteTitle = itemView.findViewById(R.id.note_title);
             noteContent = itemView.findViewById(R.id.note_content);
 
@@ -106,6 +96,10 @@ public class NoteRecyclerViewAdapter extends RecyclerView.Adapter<NoteRecyclerVi
         }
     }
 
+    /**
+     * Filter the notes based on the query
+     * @param text
+     */
     public void filter(String text) {
         List filteredNotes = controller.search(text);
         notes.clear();

@@ -2,6 +2,9 @@ package com.miomio;
 
 import java.io.Serializable;
 
+/**
+ * Note class that represents a note
+ */
 public class Note implements Serializable {
 
 

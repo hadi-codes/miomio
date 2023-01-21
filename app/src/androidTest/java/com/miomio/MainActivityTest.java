@@ -18,13 +18,12 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.junit.runner.manipulation.Ordering;
 
 import java.io.IOException;
 
 @RunWith(AndroidJUnit4.class)
 @LargeTest
-public class MainActivityUiTest {
+public class MainActivityTest {
     private NoteRepository noteRepository;
 
     @Before
@@ -56,12 +55,10 @@ public class MainActivityUiTest {
     }
 
     @Test
-    public void isEmptyViewVisible() throws InterruptedException {
+    public void isEmptyViewVisible() {
 
         onView(withId(R.id.no_notes_text)).check(matches(isDisplayed()));
     }
-
-
 
 
 }

@@ -10,11 +10,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-
-import androidx.drawerlayout.widget.DrawerLayout;
 
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
@@ -23,9 +19,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.widget.TextView;
 
-
 public class MainActivity extends AppCompatActivity {
-    private static final int NOTE_ACTIVITY_REQUEST_CODE = 0;
     private NoteRecyclerViewAdapter adapter;
     private NoteController controller;
     private TextView emptyView;
@@ -35,22 +29,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
 
+        setContentView(R.layout.activity_main);
+        // create a new NoteController with a new NoteModel
         controller = new NoteController(new NoteModel(this));
 
-
+        /* set up the notes recycler view */
         RecyclerView notesRecyclerView = findViewById(R.id.notesRecyclerView);
         notesRecyclerView.setNestedScrollingEnabled(false);
         notesRecyclerView.setHasFixedSize(true);
         notesRecyclerView.setItemViewCacheSize(20);
+
+        /* set up the empty view */
         emptyView = findViewById(R.id.no_notes_text);
+
+        /* set up the search input */
         searchInput = findViewById(R.id.input_note_search);
+
+        /* set up the FAB for adding new notes */
         FloatingActionButton floatingActionButton = findViewById(R.id.floating_action_button);
 
-
-        adapter = new NoteRecyclerViewAdapter(this,  controller);
-
+        /* initialize the adapter and set it to the recycler view */
+        adapter = new NoteRecyclerViewAdapter(this, controller);
         notesRecyclerView.setAdapter(adapter);
         setEmptyViewVisibility();
         setSearchInputVisibility();
@@ -63,19 +63,19 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        /* adding note text watcher to update search results */
         searchInput.addTextChangedListener(new NoteTextWatcher(value -> {
             adapter.filter(searchInput.getText().toString());
 
         }));
 
+
+        /* adding on click listener to push NoteFragment */
         floatingActionButton.setOnClickListener(view -> {
 
 
             FragmentTransaction fragmentTransaction = getSupportFragmentManager().beginTransaction();
-            NoteFragment noteFragment = new NoteFragment(controller);
-            fragmentTransaction.replace(R.id.mainLayout, noteFragment, NoteFragment.TAG);
-            fragmentTransaction.addToBackStack(null);
-            fragmentTransaction.commit();
+            controller.onAddNoteClicked(fragmentTransaction);
             searchInput.getText().clear();
             searchInput.clearFocus();
 
@@ -100,7 +100,11 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-
+    /**
+     * set the visibility of the empty view
+     * if there are no notes, show the empty view
+     * otherwise, hide the empty view
+     */
     void setEmptyViewVisibility() {
         if (adapter.getItemCount() == 0) {
             emptyView.setVisibility(View.VISIBLE);
@@ -109,6 +113,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * set the visibility of the search input
+     * if there are no notes, hide the search input
+     * otherwise, show the search input
+     */
     private void setSearchInputVisibility() {
 
 

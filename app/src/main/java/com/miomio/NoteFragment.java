@@ -18,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 public class NoteFragment extends Fragment {
     public static final String TAG = "NoteFragment";
 
+
     private TextInputEditText titleEditText;
     private TextInputEditText contentEditText;
     private MaterialToolbar toolbar;
@@ -31,16 +32,20 @@ public class NoteFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_note, container, false);
+        // initialize the views
         titleEditText = view.findViewById(R.id.input_note_title);
         contentEditText = view.findViewById(R.id.input_note_content);
         toolbar = view.findViewById(R.id.note_tool_bar);
         toolbar.setNavigationOnClickListener(x -> getActivity().onBackPressed());
 
+        // set the title and content of the note
         if (controller.isEditMode()) {
             setContentOfTextFields();
 
         }
+        // set up the text change listeners
         titleEditText.addTextChangedListener(
                 new NoteTextWatcher(value -> controller.onTitleChanged(value))
         );
@@ -55,6 +60,7 @@ public class NoteFragment extends Fragment {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         if (savedInstanceState != null) {
+            // restore the title and content of the note
             controller.setNote((Note) savedInstanceState.getSerializable(Note.NOTE));
 
         }
@@ -81,11 +87,18 @@ public class NoteFragment extends Fragment {
 
     }
 
+    /**
+     * Sets the content of the title and content edit text fields
+     */
+
     private void setContentOfTextFields() {
         titleEditText.setText(controller.getNote().getTitle());
         contentEditText.setText(controller.getNote().getContent());
     }
 
+    /**
+     * delete note from the database if is empty
+     */
     private void deleteNoteIfEmpty() {
         if (controller.getNote() != null && controller.getNote().isEmpty()) {
             controller.deleteNote();

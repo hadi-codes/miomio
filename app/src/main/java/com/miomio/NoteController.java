@@ -1,7 +1,7 @@
 package com.miomio;
 
 
-
+import androidx.fragment.app.FragmentTransaction;
 
 import java.util.List;
 import java.util.Observer;
@@ -60,5 +60,28 @@ public class NoteController {
 
     public List<Note> search(String query) {
         return noteModel.search(query);
+    }
+
+    public void onAddNoteClicked(FragmentTransaction fragmentTransaction) {
+        setNote(null);
+        NoteFragment noteFragment = new NoteFragment(this);
+        fragmentTransaction.replace(R.id.mainLayout, noteFragment, NoteFragment.TAG);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
+
+    }
+
+    public void onNoteClicked(FragmentTransaction fragmentTransaction, Note note) {
+
+        setNote(note);
+
+        NoteFragment noteFragment = new NoteFragment(this);
+
+        fragmentTransaction.setTransition(FragmentTransaction.TRANSIT_FRAGMENT_FADE)
+                .replace(R.id.mainLayout, noteFragment)
+                .addToBackStack(null)
+                .commit();
+
+
     }
 }

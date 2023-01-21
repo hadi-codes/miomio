@@ -14,6 +14,8 @@ import static androidx.test.espresso.matcher.ViewMatchers.withText;
 
 import static com.miomio.TestHelper.isEditTextInLayout;
 
+import static org.hamcrest.Matchers.not;
+
 import android.content.Context;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -43,19 +45,20 @@ public class NoteEditorTest {
     }
 
     @After
-    public void closeDb() throws IOException {
+    public void closeDb() {
         noteRepository.close();
     }
 
     @Rule
     public ActivityScenarioRule<MainActivity> activityRule = new ActivityScenarioRule<>(MainActivity.class);
+
     @Test
     public void updateNote() {
         createNewNote();
 
         onView(withId(R.id.notesRecyclerView)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
         onView(isEditTextInLayout(R.id.textFieldTitle)).perform(clearText(), typeText("Test Note Updated"));
-        onView(isEditTextInLayout(R.id.textFieldContent)).perform(clearText(),typeText("This is a test note updated"));
+        onView(isEditTextInLayout(R.id.textFieldContent)).perform(clearText(), typeText("This is a test note updated"));
         pressBack();
         onView(withId(R.id.notesRecyclerView)).check(matches(isDisplayed()));
         onView(withId(R.id.notesRecyclerView)).check(matches(hasDescendant(withText("Test Note Updated"))));
@@ -73,11 +76,13 @@ public class NoteEditorTest {
 
     @Test
     public void deleteNote() {
-        createNewNote();
+        onView(withId(R.id.floating_action_button)).perform(click());
+        onView(isEditTextInLayout(R.id.textFieldTitle)).perform(typeText("Deleted Note"));
+        onView(isEditTextInLayout(R.id.textFieldContent)).perform(typeText("This is a test note"));
+        pressBack();
         onView(withId(R.id.notesRecyclerView)).perform(RecyclerViewActions.actionOnItemAtPosition(0, click()));
         onView(withId(R.id.note_menu_delete)).perform(click());
-        onView(withId(R.id.notesRecyclerView)).check(matches(isDisplayed()));
-        onView(withId(R.id.notesRecyclerView)).check(matches(hasDescendant(withText("Test Note"))));
+        onView(withId(R.id.notesRecyclerView)).check(matches(hasDescendant(not(withText("Deleted Note")))));
     }
 
 }
